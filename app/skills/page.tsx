@@ -70,9 +70,8 @@ export default function SkillsPage() {
   const skillsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // GSAP animation for skills
     if (skillsRef.current) {
-      const progressBars = gsap.utils.toArray(".skill-progress");
+      const progressBars = gsap.utils.toArray<HTMLElement>(".skill-progress");
       
       progressBars.forEach((bar) => {
         gsap.from(bar, {
@@ -80,7 +79,7 @@ export default function SkillsPage() {
           duration: 1.5,
           ease: "power2.out",
           scrollTrigger: {
-            trigger: bar as Element,
+            trigger: bar,
             start: "top bottom-=100",
             toggleActions: "play none none none",
           },
@@ -123,7 +122,7 @@ export default function SkillsPage() {
                   >
                     <h2 className="text-xl font-semibold mb-6">{category.category}</h2>
                     <div className="space-y-6">
-                      {category.skills.map((skill, skillIndex) => (
+                      {category.skills.map((skill) => (
                         <div key={skill.name} className="space-y-2">
                           <div className="flex justify-between items-center">
                             <div className="flex items-center">
@@ -134,7 +133,7 @@ export default function SkillsPage() {
                           </div>
                           <Progress 
                             value={skill.level} 
-                            className="h-2"
+                            className="h-2 skill-progress"
                           />
                         </div>
                       ))}
@@ -163,7 +162,7 @@ export default function SkillsPage() {
                       </div>
                       <Progress 
                         value={skill.level} 
-                        className="h-2"
+                        className="h-2 skill-progress"
                       />
                     </div>
                   ))}
@@ -177,22 +176,17 @@ export default function SkillsPage() {
                 transition={{ duration: 0.5, delay: 0.3 }}
               >
                 <h3 className="text-2xl font-semibold mb-6 text-center">Professional Development</h3>
-                
                 <div className="space-y-8">
-                  {[
-                    {
-                      title: "Leadership & Team Management",
-                      description: "Led cross-functional teams to deliver complex projects on time and within budget. Developed team members through mentoring and code reviews."
-                    },
-                    {
-                      title: "Problem Solving & Critical Thinking",
-                      description: "Analyzed complex technical challenges and implemented innovative solutions, resulting in improved performance and user experience."
-                    },
-                    {
-                      title: "Communication & Collaboration",
-                      description: "Effectively communicated technical concepts to non-technical stakeholders and collaborated with designers, product managers, and other developers."
-                    }
-                  ].map((item, index) => (
+                  {[{
+                    title: "Leadership & Team Management",
+                    description: "Led cross-functional teams to deliver complex projects on time and within budget. Developed team members through mentoring and code reviews."
+                  }, {
+                    title: "Problem Solving & Critical Thinking",
+                    description: "Analyzed complex technical challenges and implemented innovative solutions, resulting in improved performance and user experience."
+                  }, {
+                    title: "Communication & Collaboration",
+                    description: "Effectively communicated technical concepts to non-technical stakeholders and collaborated with designers, product managers, and other developers."
+                  }].map((item, index) => (
                     <motion.div
                       key={index}
                       className="bg-card rounded-lg p-6 shadow-sm border"
