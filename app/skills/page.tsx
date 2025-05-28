@@ -179,21 +179,21 @@ export default function SkillsPage() {
 
     progressBars.forEach((el) => {
       const targetWidth = el.getAttribute("data-target-width") || "0%";
-      gsap.fromTo(
-        el,
-        { width: 0 },
-        {
-          width: targetWidth,
-          duration: 1.5,
-          ease: "power2.out",
-          scrollTrigger: {
-            trigger: el,
-            start: "top bottom-=100px",
-            toggleActions: "play none none none",
-          },
-        }
-      );
-    });
+    //   gsap.fromTo(
+    //     el,
+    //     { width: 0 },
+    //     {
+    //       width: targetWidth,
+    //       duration: 1.5,
+    //       ease: "power2.out",
+    //       scrollTrigger: {
+    //         trigger: el,
+    //         start: "top bottom-=100px",
+    //         toggleActions: "play none none none",
+    //       },
+    //     }
+    //   );
+    // });
 
     // Cleanup ScrollTrigger instances on unmount
     return () => {
