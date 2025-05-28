@@ -73,18 +73,19 @@ export default function SkillsPage() {
     if (skillsRef.current) {
       const progressBars = gsap.utils.toArray<HTMLElement>(".skill-progress");
       
-      progressBars.forEach((bar) => {
-        gsap.from(bar, {
-          width: 0,
-          duration: 1.5,
-          ease: "power2.out",
-          scrollTrigger: {
-            trigger: bar,
-            start: "top bottom-=100",
-            toggleActions: "play none none none",
-          },
-        });
-      });
+    progressBars.forEach((bar) => {
+  gsap.from(bar as HTMLElement, {
+    width: 0,
+    duration: 1.5,
+    ease: "power2.out",
+    scrollTrigger: {
+      trigger: bar as Element,
+      start: "top bottom-=100",
+      toggleActions: "play none none none",
+    },
+  });
+});
+
     }
   }, []);
 
