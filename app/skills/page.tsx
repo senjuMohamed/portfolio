@@ -71,9 +71,8 @@ export default function SkillsPage() {
 
   useEffect(() => {
     if (skillsRef.current) {
-      const progressBars = gsap.utils.toArray(".skill-progress");
-      progressBars.forEach((bar) => {
-        const el = bar as HTMLElement;
+      const progressBars = gsap.utils.toArray<HTMLElement>(".skill-progress");
+      progressBars.forEach((el) => {
         gsap.from(el, {
           width: 0,
           duration: 1.5,
