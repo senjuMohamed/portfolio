@@ -1,14 +1,7 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
+import React, { useRef } from "react";
 import { motion } from "framer-motion";
-import { gsap } from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-
-// Register GSAP plugin safely
-if (typeof window !== "undefined" && !gsap.core.globals().ScrollTrigger) {
-  gsap.registerPlugin(ScrollTrigger);
-}
 
 interface TabsProps {
   defaultValue: string;
@@ -145,7 +138,7 @@ const softSkills = [
   { name: "Creativity", level: 85, icon: "🎨" },
 ];
 
-// Progress bar component compatible with GSAP animation
+// Progress bar component (no GSAP)
 const Progress = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement> & { value: number }
@@ -158,9 +151,8 @@ const Progress = React.forwardRef<
       style={{ height: 8 }}
     >
       <div
-        className="bg-blue-600 h-full"
-        style={{ width: 0 }}
-        data-target-width={`${value}%`}
+        className="bg-blue-600 h-full transition-all duration-700"
+        style={{ width: `${value}%` }}
       />
     </div>
   );
@@ -169,37 +161,6 @@ Progress.displayName = "Progress";
 
 export default function SkillsPage() {
   const skillsRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!skillsRef.current) return;
-
-    const progressBars = skillsRef.current.querySelectorAll<HTMLDivElement>(
-      ".skill-progress > div"
-    );
-
-    progressBars.forEach((el) => {
-      const targetWidth = el.getAttribute("data-target-width") || "0%";
-    //   gsap.fromTo(
-    //     el,
-    //     { width: 0 },
-    //     {
-    //       width: targetWidth,
-    //       duration: 1.5,
-    //       ease: "power2.out",
-    //       scrollTrigger: {
-    //         trigger: el,
-    //         start: "top bottom-=100px",
-    //         toggleActions: "play none none none",
-    //       },
-    //     }
-    //   );
-    // });
-
-    // Cleanup ScrollTrigger instances on unmount
-    return () => {
-      ScrollTrigger.getAll().forEach((st) => st.kill());
-    };
-  }, []);
 
   return (
     <div className="pt-24 pb-16 min-h-screen bg-gray-50">
@@ -249,9 +210,7 @@ export default function SkillsPage() {
                               {skill.level}%
                             </span>
                           </div>
-                          <Progress
-                            value={skill.level}
-                          />
+                          <Progress value={skill.level} />
                         </div>
                       ))}
                     </div>
