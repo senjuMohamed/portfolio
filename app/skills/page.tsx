@@ -1,16 +1,95 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { Progress } from "@/components/ui/progress";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-// Register GSAP plugins
-if (typeof window !== "undefined") {
+// Register GSAP plugin safely
+if (typeof window !== "undefined" && !gsap.core.globals().ScrollTrigger) {
   gsap.registerPlugin(ScrollTrigger);
 }
+
+interface TabsProps {
+  defaultValue: string;
+  children: React.ReactNode;
+  className?: string;
+}
+const Tabs = ({ children, defaultValue }: TabsProps) => {
+  const [activeTab, setActiveTab] = React.useState(defaultValue);
+  return (
+    <div>
+      {/* Render Tab triggers */}
+      {React.Children.toArray(children)
+        .filter((child: any) => child.type.name === "TabsList")
+        .map((tabsList) =>
+          React.cloneElement(tabsList as React.ReactElement, {
+            activeTab,
+            setActiveTab,
+          })
+        )}
+      {/* Render Tab contents */}
+      {React.Children.toArray(children)
+        .filter((child: any) => child.type.name === "TabsContent")
+        .map((tabContent) =>
+          (tabContent as React.ReactElement).props.value === activeTab
+            ? tabContent
+            : null
+        )}
+    </div>
+  );
+};
+
+const TabsList = ({
+  children,
+  activeTab,
+  setActiveTab,
+}: {
+  children: React.ReactNode;
+  activeTab: string;
+  setActiveTab: (val: string) => void;
+}) => (
+  <div className="grid w-full grid-cols-2 mb-8">
+    {React.Children.map(children, (child) => {
+      if (!React.isValidElement(child)) return null;
+      return React.cloneElement(child, {
+        isActive: child.props.value === activeTab,
+        onClick: () => setActiveTab(child.props.value),
+      });
+    })}
+  </div>
+);
+
+const TabsTrigger = ({
+  children,
+  value,
+  isActive,
+  onClick,
+}: {
+  children: React.ReactNode;
+  value: string;
+  isActive?: boolean;
+  onClick?: () => void;
+}) => (
+  <button
+    onClick={onClick}
+    className={`py-3 px-6 rounded-t-lg border-b-2 font-semibold ${
+      isActive
+        ? "border-blue-600 text-blue-600"
+        : "border-transparent text-gray-600 hover:text-blue-500"
+    }`}
+  >
+    {children}
+  </button>
+);
+
+const TabsContent = ({
+  children,
+  value,
+}: {
+  children: React.ReactNode;
+  value: string;
+}) => <div>{children}</div>;
 
 interface Skill {
   name: string;
@@ -66,60 +145,98 @@ const softSkills = [
   { name: "Creativity", level: 85, icon: "🎨" },
 ];
 
+// Progress bar component compatible with GSAP animation
+const Progress = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement> & { value: number }
+>(({ value, className, ...props }, ref) => {
+  return (
+    <div
+      ref={ref}
+      className={`w-full bg-gray-300 rounded-full overflow-hidden ${className ?? ""} skill-progress`}
+      {...props}
+      style={{ height: 8 }}
+    >
+      <div
+        className="bg-blue-600 h-full"
+        style={{ width: 0 }}
+        data-target-width={`${value}%`}
+      />
+    </div>
+  );
+});
+Progress.displayName = "Progress";
+
 export default function SkillsPage() {
   const skillsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (skillsRef.current) {
-      const progressBars = gsap.utils.toArray<HTMLElement>(".skill-progress");
-      progressBars.forEach((el) => {
-        gsap.from(el, {
-          width: 0,
+    if (!skillsRef.current) return;
+
+    const progressBars = skillsRef.current.querySelectorAll<HTMLDivElement>(
+      ".skill-progress > div"
+    );
+
+    progressBars.forEach((el) => {
+      const targetWidth = el.getAttribute("data-target-width") || "0%";
+      gsap.fromTo(
+        el,
+        { width: 0 },
+        {
+          width: targetWidth,
           duration: 1.5,
           ease: "power2.out",
           scrollTrigger: {
             trigger: el,
-            start: "top bottom-=100",
+            start: "top bottom-=100px",
             toggleActions: "play none none none",
           },
-        });
-      });
-    }
+        }
+      );
+    });
+
+    // Cleanup ScrollTrigger instances on unmount
+    return () => {
+      ScrollTrigger.getAll().forEach((st) => st.kill());
+    };
   }, []);
 
   return (
-    <div className="pt-24 pb-16">
+    <div className="pt-24 pb-16 min-h-screen bg-gray-50">
       <div className="container px-4 mx-auto">
-        <motion.div 
+        <motion.div
           className="max-w-3xl mx-auto text-center mb-16"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
           <h1 className="text-4xl md:text-5xl font-bold mb-4">My Skills</h1>
-          <p className="text-muted-foreground text-lg">
-            A comprehensive overview of my technical and soft skills that I've developed throughout my career.
+          <p className="text-gray-600 text-lg">
+            A comprehensive overview of my technical and soft skills that I've
+            developed throughout my career.
           </p>
         </motion.div>
 
         <div ref={skillsRef}>
           <Tabs defaultValue="technical" className="max-w-4xl mx-auto">
-            <TabsList className="grid w-full grid-cols-2 mb-8">
+            <TabsList>
               <TabsTrigger value="technical">Technical Skills</TabsTrigger>
               <TabsTrigger value="soft">Soft Skills</TabsTrigger>
             </TabsList>
-            
-            <TabsContent value="technical" className="mt-0">
+
+            <TabsContent value="technical">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                 {technicalSkills.map((category, categoryIndex) => (
                   <motion.div
                     key={category.category}
-                    className="bg-card rounded-lg p-6 shadow-sm border"
+                    className="bg-white rounded-lg p-6 shadow-sm border border-gray-200"
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5, delay: categoryIndex * 0.1 }}
                   >
-                    <h2 className="text-xl font-semibold mb-6">{category.category}</h2>
+                    <h2 className="text-xl font-semibold mb-6">
+                      {category.category}
+                    </h2>
                     <div className="space-y-6">
                       {category.skills.map((skill) => (
                         <div key={skill.name} className="space-y-2">
@@ -128,11 +245,12 @@ export default function SkillsPage() {
                               <span className="mr-2 text-xl">{skill.icon}</span>
                               <span>{skill.name}</span>
                             </div>
-                            <span className="text-sm font-medium">{skill.level}%</span>
+                            <span className="text-sm font-medium">
+                              {skill.level}%
+                            </span>
                           </div>
-                          <Progress 
-                            value={skill.level} 
-                            className="h-2 skill-progress"
+                          <Progress
+                            value={skill.level}
                           />
                         </div>
                       ))}
@@ -141,10 +259,10 @@ export default function SkillsPage() {
                 ))}
               </div>
             </TabsContent>
-            
+
             <TabsContent value="soft">
               <motion.div
-                className="bg-card rounded-lg p-6 shadow-sm border"
+                className="bg-white rounded-lg p-6 shadow-sm border border-gray-200"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5 }}
@@ -157,46 +275,12 @@ export default function SkillsPage() {
                           <span className="mr-2 text-xl">{skill.icon}</span>
                           <span>{skill.name}</span>
                         </div>
-                        <span className="text-sm font-medium">{skill.level}%</span>
+                        <span className="text-sm font-medium">
+                          {skill.level}%
+                        </span>
                       </div>
-                      <Progress 
-                        value={skill.level} 
-                        className="h-2 skill-progress"
-                      />
+                      <Progress value={skill.level} />
                     </div>
-                  ))}
-                </div>
-              </motion.div>
-              
-              <motion.div
-                className="mt-12"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.5, delay: 0.3 }}
-              >
-                <h3 className="text-2xl font-semibold mb-6 text-center">Professional Development</h3>
-                <div className="space-y-8">
-                  {[{
-                    title: "Leadership & Team Management",
-                    description: "Led cross-functional teams to deliver complex projects on time and within budget. Developed team members through mentoring and code reviews."
-                  }, {
-                    title: "Problem Solving & Critical Thinking",
-                    description: "Analyzed complex technical challenges and implemented innovative solutions, resulting in improved performance and user experience."
-                  }, {
-                    title: "Communication & Collaboration",
-                    description: "Effectively communicated technical concepts to non-technical stakeholders and collaborated with designers, product managers, and other developers."
-                  }].map((item, index) => (
-                    <motion.div
-                      key={index}
-                      className="bg-card rounded-lg p-6 shadow-sm border"
-                      initial={{ opacity: 0, x: index % 2 === 0 ? -20 : 20 }}
-                      whileInView={{ opacity: 1, x: 0 }}
-                      viewport={{ once: true }}
-                      transition={{ duration: 0.5 }}
-                    >
-                      <h4 className="text-xl font-semibold mb-2">{item.title}</h4>
-                      <p className="text-muted-foreground">{item.description}</p>
-                    </motion.div>
                   ))}
                 </div>
               </motion.div>
@@ -207,3 +291,4 @@ export default function SkillsPage() {
     </div>
   );
 }
+
