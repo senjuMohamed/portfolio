@@ -45,9 +45,9 @@ const TabsList = ({
   <div className="grid w-full grid-cols-2 mb-8">
     {React.Children.map(children, (child) => {
       if (!React.isValidElement(child)) return null;
-      return React.cloneElement(child, {
-        isActive: child.props.value === activeTab,
-        onClick: () => setActiveTab(child.props.value),
+      return React.cloneElement(child as React.ReactElement<any>, {
+        isActive: (child.props as any).value === activeTab,
+        onClick: () => setActiveTab((child.props as any).value),
       });
     })}
   </div>
