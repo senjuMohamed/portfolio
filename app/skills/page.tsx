@@ -85,7 +85,7 @@ const technicalSkills: SkillCategory[] = [
     category: "Backend",
     skills: [
       { name: "Laravel", level: 90 },
-      { name: "PHP, MVC & OOP", level: 75 },
+      { name: "PHP & MVC", level: 75 },
       { name: "MySQL", level: 65 },
       { name: "REST API development", level: 65 },
       { name: "CRUD & authentication", level: 75 },
