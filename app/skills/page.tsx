@@ -46,10 +46,11 @@ const TabsTrigger = ({
     <button
       type="button"
       onClick={() => tabs?.setActiveTab(value)}
+      aria-pressed={isActive}
       className={`py-3 px-6 rounded-t-lg border-b-2 font-semibold ${
         isActive
-          ? "border-blue-600 text-blue-600"
-          : "border-transparent text-gray-600 hover:text-blue-500"
+          ? "border-[#0a0f4f] text-[#0a0f4f] dark:border-blue-400 dark:text-blue-400"
+          : "border-transparent text-muted-foreground hover:text-foreground"
       }`}
     >
       {children}
@@ -72,7 +73,6 @@ const TabsContent = ({
 interface Skill {
   name: string;
   level: number;
-  icon: string;
 }
 
 interface SkillCategory {
@@ -84,43 +84,43 @@ const technicalSkills: SkillCategory[] = [
   {
     category: "Backend",
     skills: [
-      { name: "Laravel 10", level: 90, icon: "🔺" },
-      { name: "PHP MVC", level: 65, icon: "🐘" },
-      { name: "MySQL", level: 65, icon: "🗄️" },
-      { name: "PostgreSQL", level: 60, icon: "🐘" },
-      { name: "REST API development", level: 65, icon: "🔄" },
+      { name: "Laravel", level: 90 },
+      { name: "PHP, MVC & OOP", level: 75 },
+      { name: "MySQL", level: 65 },
+      { name: "REST API development", level: 65 },
+      { name: "CRUD & authentication", level: 75 },
     ],
   },
   {
     category: "Frontend",
     skills: [
-      { name: "Blade Templates", level: 65, icon: "📝" },
-      { name: "HTML/CSS", level: 65, icon: "🌐" },
-      { name: "React (TypeScript)", level: 65, icon: "⚛️" },
-      { name: "Tailwind CSS", level: 65, icon: "🎨" },
-      { name: "Bootstrap 5", level: 60, icon: "🅱️" },
+      { name: "Blade templates", level: 75 },
+      { name: "HTML & CSS", level: 75 },
+      { name: "JavaScript", level: 65 },
+      { name: "Tailwind CSS", level: 65 },
+      { name: "Bootstrap 5", level: 60 },
     ],
   },
   {
-    category: "Tools & Libraries",
+    category: "Tools & Integrations",
     skills: [
-      { name: "Git, GitHub", level: 65, icon: "🔄" },
-      { name: "WhatsApp API (planned)", level: 60, icon: "💬" },
-      { name: "Soft UI Dashboard", level: 60, icon: "📊" },
-      { name: "Figma/Uizard", level: 60, icon: "🎨" },
-      { name: "WordPress integration", level: 60, icon: "🌍" },
+      { name: "Git & GitHub", level: 65 },
+      { name: "WordPress integration", level: 60 },
+      { name: "Postman", level: 65 },
+      { name: "Figma", level: 60 },
+      { name: "Soft UI Dashboard", level: 60 },
     ],
   },
 ];
 
 const softSkills = [
-  { name: "Communication", level: 90, icon: "🗣️" },
-  { name: "Teamwork", level: 95, icon: "👥" },
-  { name: "Problem Solving", level: 90, icon: "🧩" },
-  { name: "Time Management", level: 85, icon: "⏰" },
-  { name: "Leadership", level: 80, icon: "👑" },
-  { name: "Adaptability", level: 90, icon: "🔄" },
-  { name: "Creativity", level: 85, icon: "🎨" },
+  { name: "Communication", level: 90 },
+  { name: "Teamwork", level: 95 },
+  { name: "Problem Solving", level: 90 },
+  { name: "Time Management", level: 85 },
+  { name: "Leadership", level: 80 },
+  { name: "Adaptability", level: 90 },
+  { name: "Creativity", level: 85 },
 ];
 
 // Progress bar component (no GSAP)
@@ -131,12 +131,12 @@ const Progress = React.forwardRef<
   return (
     <div
       ref={ref}
-      className={`w-full bg-gray-300 rounded-full overflow-hidden ${className ?? ""} skill-progress`}
+      className={`w-full bg-muted rounded-full overflow-hidden ${className ?? ""} skill-progress`}
       {...props}
       style={{ height: 8 }}
     >
       <div
-        className="bg-blue-600 h-full transition-all duration-700"
+        className="h-full bg-[#0a0f4f] transition-all duration-700 dark:bg-blue-400"
         style={{ width: `${value}%` }}
       />
     </div>
@@ -148,7 +148,7 @@ export default function SkillsPage() {
   const skillsRef = useRef<HTMLDivElement>(null);
 
   return (
-    <div className="pt-24 pb-16 min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background pt-24 pb-16 text-foreground transition-colors">
       <div className="container px-4 mx-auto">
         <motion.div
           className="max-w-3xl mx-auto text-center mb-16"
@@ -157,7 +157,7 @@ export default function SkillsPage() {
           transition={{ duration: 0.5 }}
         >
           <h1 className="text-4xl md:text-5xl font-bold mb-4">My Skills</h1>
-          <p className="text-gray-600 text-lg">
+          <p className="text-muted-foreground text-lg">
             A comprehensive overview of my technical and soft skills that I've
             developed throughout my career.
           </p>
@@ -175,7 +175,7 @@ export default function SkillsPage() {
                 {technicalSkills.map((category, categoryIndex) => (
                   <motion.div
                     key={category.category}
-                    className="bg-white rounded-lg p-6 shadow-sm border border-gray-200"
+                    className="rounded-lg border bg-card p-6 text-card-foreground shadow-sm"
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5, delay: categoryIndex * 0.1 }}
@@ -187,10 +187,7 @@ export default function SkillsPage() {
                       {category.skills.map((skill) => (
                         <div key={skill.name} className="space-y-2">
                           <div className="flex justify-between items-center">
-                            <div className="flex items-center">
-                              <span className="mr-2 text-xl">{skill.icon}</span>
-                              <span>{skill.name}</span>
-                            </div>
+                            <span>{skill.name}</span>
                             <span className="text-sm font-medium">
                               {skill.level}%
                             </span>
@@ -206,7 +203,7 @@ export default function SkillsPage() {
 
             <TabsContent value="soft">
               <motion.div
-                className="bg-white rounded-lg p-6 shadow-sm border border-gray-200"
+                className="rounded-lg border bg-card p-6 text-card-foreground shadow-sm"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5 }}
@@ -215,10 +212,7 @@ export default function SkillsPage() {
                   {softSkills.map((skill) => (
                     <div key={skill.name} className="space-y-2">
                       <div className="flex justify-between items-center">
-                        <div className="flex items-center">
-                          <span className="mr-2 text-xl">{skill.icon}</span>
-                          <span>{skill.name}</span>
-                        </div>
+                        <span>{skill.name}</span>
                         <span className="text-sm font-medium">
                           {skill.level}%
                         </span>
