@@ -8,73 +8,54 @@ interface TabsProps {
   children: React.ReactNode;
   className?: string;
 }
-const Tabs = ({ children, defaultValue }: TabsProps) => {
+
+interface TabsContextValue {
+  activeTab: string;
+  setActiveTab: (value: string) => void;
+}
+
+const TabsContext = React.createContext<TabsContextValue | null>(null);
+
+const Tabs = ({ children, defaultValue, className }: TabsProps) => {
   const [activeTab, setActiveTab] = React.useState(defaultValue);
+
   return (
-    <div>
-      {/* Render Tab triggers */}
-      {React.Children.toArray(children)
-        .filter((child: any) => child.type.name === "TabsList")
-        .map((tabsList) =>
-          React.cloneElement(tabsList as React.ReactElement, {
-            activeTab,
-            setActiveTab,
-          })
-        )}
-      {/* Render Tab contents */}
-      {React.Children.toArray(children)
-        .filter((child: any) => child.type.name === "TabsContent")
-        .map((tabContent) =>
-          (tabContent as React.ReactElement).props.value === activeTab
-            ? tabContent
-            : null
-        )}
-    </div>
+    <TabsContext.Provider value={{ activeTab, setActiveTab }}>
+      <div className={className}>{children}</div>
+    </TabsContext.Provider>
   );
 };
 
-const TabsList = ({
-  children,
-  activeTab,
-  setActiveTab,
-}: {
-  children: React.ReactNode;
-  activeTab?: string;
-  setActiveTab?: (val: string) => void;
-}) => (
+const TabsList = ({ children }: { children: React.ReactNode }) => (
   <div className="grid w-full grid-cols-2 mb-8">
-    {React.Children.map(children, (child) => {
-      if (!React.isValidElement(child)) return null;
-      return React.cloneElement(child as React.ReactElement<any>, {
-        isActive: (child.props as any).value === activeTab,
-        onClick: () => setActiveTab?.((child.props as any).value),
-      });
-    })}
+    {children}
   </div>
 );
 
 const TabsTrigger = ({
   children,
   value,
-  isActive,
-  onClick,
 }: {
   children: React.ReactNode;
   value: string;
-  isActive?: boolean;
-  onClick?: () => void;
-}) => (
-  <button
-    onClick={onClick}
-    className={`py-3 px-6 rounded-t-lg border-b-2 font-semibold ${
-      isActive
-        ? "border-blue-600 text-blue-600"
-        : "border-transparent text-gray-600 hover:text-blue-500"
-    }`}
-  >
-    {children}
-  </button>
-);
+}) => {
+  const tabs = React.useContext(TabsContext);
+  const isActive = tabs?.activeTab === value;
+
+  return (
+    <button
+      type="button"
+      onClick={() => tabs?.setActiveTab(value)}
+      className={`py-3 px-6 rounded-t-lg border-b-2 font-semibold ${
+        isActive
+          ? "border-blue-600 text-blue-600"
+          : "border-transparent text-gray-600 hover:text-blue-500"
+      }`}
+    >
+      {children}
+    </button>
+  );
+};
 
 const TabsContent = ({
   children,
@@ -82,7 +63,11 @@ const TabsContent = ({
 }: {
   children: React.ReactNode;
   value: string;
-}) => <div>{children}</div>;
+}) => {
+  const tabs = React.useContext(TabsContext);
+
+  return tabs?.activeTab === value ? <div>{children}</div> : null;
+};
 
 interface Skill {
   name: string;
